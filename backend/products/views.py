@@ -1,7 +1,7 @@
 from cgitb import reset
 from requests import request
 
-from rest_framework import generics, mixins
+from rest_framework import generics, mixins, permissions, authentication
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -13,6 +13,8 @@ from .serializers import ProductSerializer
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         title = serializer.validated_data.get('title')
@@ -55,14 +57,6 @@ class ProductDestroyAPIView(generics.DestroyAPIView):
 
 product_destroy_view = ProductDestroyAPIView.as_view()
 
-#class ProductDeleteAPIView(generics.DeleteAPIView):
-#    queryset = Product.objects.all()
-#    serializer_class = ProductSerializer
-
-#product__view = ProductDeleteAPIView.as_view()
-
-
-
 
 class ProductMixinView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,generics.GenericAPIView):
     queryset = Product.objects.all()
@@ -84,7 +78,6 @@ class ProductMixinView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Re
         if content is None:
             content = "simple view"
         serializer.save(content=content)
-
 
 product_mixin_view = ProductMixinView.as_view()
 
