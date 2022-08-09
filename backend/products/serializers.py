@@ -1,14 +1,17 @@
 from cgitb import lookup
 from itertools import product
+from wsgiref.validate import validator
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
+from .validators import validate_title
 from .models import Product
 
 class ProductSerializer(serializers.ModelSerializer):
     my_discount = serializers.SerializerMethodField(read_only=True)
     edit_url = serializers.SerializerMethodField(read_only=True)
     url = serializers.HyperlinkedIdentityField(view_name='product-detail', lookup_field='pk')
+    title = serializers.CharField(validators=[validate_title])
     class Meta:
         model = Product
         fields = [
@@ -21,6 +24,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'sale_price',
             'my_discount',
         ]
+        
 
     def validate_title(self, value):
         qs = Product.objects.filter(title__iexact=value)
